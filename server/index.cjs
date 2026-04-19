@@ -9,8 +9,8 @@ app.use(express.json());
 
 // ─── Config ───────────────────────────────────────────────────────────────────
 
-const ANALYTICS_BASE = 'https://analytics.ai.8x8.com';
-const API_PREFIX     = '/api/c8/ua-eris/analytics/work/v1';
+const ANALYTICS_BASE = 'https://api.8x8.com';
+const API_PREFIX     = '/analytics/work/v3';
 const TOKEN_URL      = 'https://api.8x8.com/oauth/v2/token';
 
 const CLIENT_ID      = process.env.EIGHT_BY_EIGHT_CLIENT_ID;
@@ -184,7 +184,7 @@ app.get('/api/daily', async (req, res) => {
     sortOption: [{ sortField: 'startTime', sortId: 1, sortOrder: 'DESC' }],
   };
   try {
-    const data    = await analyticsPost('/api/analytics/report/internal/cdr', body);
+    const data    = await analyticsPost('/analytics/work/v3/cdr', body);
     const records = data?.data || data?.records || (Array.isArray(data) ? data : []);
     res.json({ stats: aggregateCDR(records), period: { startDate: start, endDate: end }, timestamp: new Date().toISOString() });
   } catch (err) { handleApiError(err, res); }
@@ -202,7 +202,7 @@ app.get('/api/historical', async (req, res) => {
     sortOption: [{ sortField: 'startTime', sortId: 1, sortOrder: 'DESC' }],
   };
   try {
-    const data = await analyticsPost('/api/analytics/report/internal/cdr', body);
+    const data = await analyticsPost('/analytics/work/v3/cdr', body);
     res.json(data);
   } catch (err) { handleApiError(err, res); }
 });
