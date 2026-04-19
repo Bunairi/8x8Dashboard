@@ -13,8 +13,7 @@ const ANALYTICS_BASE = 'https://api.8x8.com';
 const API_PREFIX     = '/analytics/work/v3';
 const TOKEN_URL      = 'https://api.8x8.com/oauth/v2/token';
 
-const CLIENT_ID      = process.env.EIGHT_BY_EIGHT_CLIENT_ID;
-const CLIENT_SECRET  = process.env.EIGHT_BY_EIGHT_CLIENT_SECRET;
+const API_KEY        = process.env.EIGHT_BY_EIGHT_API_KEY;
 const PBX_ID         = process.env.EIGHT_BY_EIGHT_PBX_ID;
 const PBX_NAME       = process.env.EIGHT_BY_EIGHT_PBX_NAME;
 const QUEUE_IDS      = process.env.EIGHT_BY_EIGHT_QUEUE_IDS;
@@ -31,66 +30,25 @@ const ALL_METRICS = [
   'ongoingAvgOnHoldTime', 'ongoingLongestOnHoldTime', 'ongoingOnHoldTime',
 ].join(',');
 
-// ─── OAuth Token Management ───────────────────────────────────────────────────
-
-let tokenCache = { accessToken: null, expiresAt: 0 };
-
-async function getAccessToken() {
-  // Return cached token if still valid (with 60s buffer)
-  if (tokenCache.accessToken && Date.now() < tokenCache.expiresAt - 60_000) {
-    return tokenCache.accessToken;
-  }
-
-  if (!CLIENT_ID || !CLIENT_SECRET) {
-    throw new Error('EIGHT_BY_EIGHT_CLIENT_ID and EIGHT_BY_EIGHT_CLIENT_SECRET must be set in .env');
-  }
-
-  console.log('[Auth] Fetching new OAuth token…');
-  const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
-
-  const response = await axios.post(TOKEN_URL, 'grant_type=client_credentials', {
-    headers: {
-      'Content-Type':  'application/x-www-form-urlencoded',
-      'Authorization': `Basic ${credentials}`,
-    },
-  });
-
-  const { access_token, expires_in } = response.data;
-  tokenCache = {
-    accessToken: access_token,
-    expiresAt:   Date.now() + (expires_in * 1000),
-  };
-
-  console.log(`[Auth] Token acquired, expires in ${expires_in}s`);
-  return access_token;
-}
-
 // ─── API Helpers ──────────────────────────────────────────────────────────────
 
+function apiHeaders() {
+  if (!API_KEY) throw new Error('EIGHT_BY_EIGHT_API_KEY not set in .env');
+  return { '8x8-apikey': API_KEY, Accept: 'application/json' };
+}
+
 async function analyticsGet(path, params = {}) {
-  const token = await getAccessToken();
-  const url   = `${ANALYTICS_BASE}${API_PREFIX}${path}`;
+  const url = `${ANALYTICS_BASE}${API_PREFIX}${path}`;
   console.log(`[GET] ${url}`);
-  const response = await axios.get(url, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      Accept:        'application/json',
-    },
-    params,
-  });
+  const response = await axios.get(url, { headers: apiHeaders(), params });
   return response.data;
 }
 
 async function analyticsPost(path, body) {
-  const token = await getAccessToken();
-  const url   = `${ANALYTICS_BASE}${path}`;
+  const url = `${ANALYTICS_BASE}${path}`;
   console.log(`[POST] ${url}`);
   const response = await axios.post(url, body, {
-    headers: {
-      Authorization:  `Bearer ${token}`,
-      'Content-Type': 'application/json',
-      Accept:         'application/json',
-    },
+    headers: { ...apiHeaders(), 'Content-Type': 'application/json' },
   });
   return response.data;
 }
@@ -141,13 +99,8 @@ function aggregateCDR(records) {
 
 // ─── Routes ───────────────────────────────────────────────────────────────────
 
-app.get('/api/health', async (_req, res) => {
-  try {
-    await getAccessToken();
-    res.json({ status: 'ok', auth: 'oauth', pbxId: PBX_ID || null, queueIds: QUEUE_IDS || null });
-  } catch (err) {
-    res.status(500).json({ status: 'error', error: err.message });
-  }
+app.get('/api/health', (_req, res) => {
+  res.json({ status: 'ok', auth: 'apikey', apiKey: API_KEY ? 'set' : 'MISSING', pbxId: PBX_ID || null, queueIds: QUEUE_IDS || null });
 });
 
 app.get('/api/queues', async (_req, res) => {
@@ -221,12 +174,7 @@ if (process.env.NODE_ENV === 'production') {
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
   console.log(`\n8x8 Dashboard API  →  http://localhost:${PORT}`);
-  console.log(`  Auth    : OAuth 2.0 (client_credentials)`);
-  console.log(`  PBX ID  : ${PBX_ID || 'MISSING'}`);
-  try {
-    await getAccessToken();
-    console.log('  Token   : acquired ✓\n');
-  } catch (err) {
-    console.error('  Token   : FAILED —', err.message, '\n');
-  }
+  console.log(`  Auth    : API Key (8x8-apikey header)`);
+  console.log(`  API Key : ${API_KEY ? 'set ✓' : 'MISSING ✗'}`);
+  console.log(`  PBX ID  : ${PBX_ID || 'MISSING'}\n`);
 });
