@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:developer.8x8.com)",
+      "WebFetch(domain:support.8x8.com)",
+      "WebFetch(domain:support-portal.8x8.com)",
+      "Bash(npm install *)",
+      "Read(//c/Program Files/**)",
+      "Read(//c/Program Files \\(x86\\)/**)",
+      "Read(//c/Users/SalmanAhmed/AppData/Roaming/**)",
+      "Bash(cmd.exe /c \"where node\")",
+      "Bash(cmd.exe /c \"where node 2>&1\")",
+      "Bash(cmd.exe /c \"node --version && npm --version\")",
+      "Bash(powershell.exe -Command \"node --version; npm --version\")",
+      "Bash(node -e \"require\\('puppeteer-core'\\); console.log\\('ok'\\)\")"
+    ]
+  }
+}

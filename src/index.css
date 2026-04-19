@@ -1,0 +1,131 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ─────────────────────────────────────────────────────────────────
+   Design tokens
+   ───────────────────────────────────────────────────────────────── */
+:root {
+  --accent-hue: 260;
+  --accent: oklch(0.68 0.2 var(--accent-hue));
+  --accent-soft: color-mix(in oklch, var(--accent) 15%, transparent);
+
+  --font-sans: 'Inter Tight', 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+
+html[data-theme='dark'], html:not([data-theme]) {
+  --bg-canvas:   oklch(0.16 0.005 270);
+  --bg-surface:  oklch(0.19 0.005 270);
+  --bg-raised:   oklch(0.22 0.005 270);
+  --card-bg:     oklch(0.21 0.005 270);
+  --rule:        oklch(0.28 0.005 270);
+  --rule-strong: oklch(0.36 0.005 270);
+  --rule-faint:  oklch(0.24 0.005 270);
+  --fg:          oklch(0.96 0.005 270);
+  --fg-quiet:    oklch(0.72 0.005 270);
+  --fg-faint:    oklch(0.48 0.005 270);
+  color-scheme: dark;
+}
+
+html[data-theme='light'] {
+  --bg-canvas:   oklch(0.985 0.003 270);
+  --bg-surface:  oklch(1 0 0);
+  --bg-raised:   oklch(0.97 0.003 270);
+  --card-bg:     oklch(1 0 0);
+  --rule:        oklch(0.9 0.004 270);
+  --rule-strong: oklch(0.82 0.005 270);
+  --rule-faint:  oklch(0.94 0.003 270);
+  --fg:          oklch(0.2 0.01 270);
+  --fg-quiet:    oklch(0.48 0.008 270);
+  --fg-faint:    oklch(0.68 0.005 270);
+  color-scheme: light;
+}
+
+html[data-card-style='filled'] { --card-bg: oklch(0.23 0.005 270); }
+html[data-theme='light'][data-card-style='filled'] { --card-bg: oklch(0.96 0.003 270); }
+html[data-card-style='ghost']  { --card-bg: transparent; }
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--bg-canvas);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ─────────────────────────────────────────────────────────────────
+   React Grid Layout overrides
+   ───────────────────────────────────────────────────────────────── */
+.react-grid-item {
+  transition: all 200ms ease;
+  transition-property: left, top, width, height;
+}
+.react-grid-item.cssTransforms { transition-property: transform, width, height; }
+.react-grid-item.react-draggable-dragging {
+  transition: none; z-index: 100; cursor: grabbing;
+  box-shadow: 0 25px 50px -12px rgba(0,0,0,0.6);
+}
+.react-grid-item.react-grid-placeholder {
+  background: var(--accent-soft);
+  border: 1px dashed var(--accent);
+  border-radius: 10px;
+  opacity: 1;
+}
+.react-resizable-handle {
+  position: absolute; width: 14px; height: 14px;
+  right: 0; bottom: 0; cursor: nwse-resize;
+  opacity: 0; transition: opacity 0.15s;
+}
+.react-grid-item:hover .react-resizable-handle { opacity: 1; }
+.react-resizable-handle::after {
+  content: ""; position: absolute; right: 3px; bottom: 3px;
+  width: 6px; height: 6px;
+  border-right: 1.5px solid var(--accent);
+  border-bottom: 1.5px solid var(--accent);
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--rule); border-radius: 5px;
+  border: 2px solid var(--bg-surface);
+}
+::-webkit-scrollbar-thumb:hover { background: var(--rule-strong); }
+
+/* Date input fix */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.55); cursor: pointer;
+}
+
+::selection { background: color-mix(in oklch, var(--accent) 40%, transparent); }
+
+/* ─────────────────────────────────────────────────────────────────
+   Animations
+   ───────────────────────────────────────────────────────────────── */
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+.pulse-dot { animation: pulse-dot 2s ease-in-out infinite; }
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+.fade-in { animation: fade-in 0.15s ease; }
+
+/* ─────────────────────────────────────────────────────────────────
+   Token-backed utilities (used in JSX instead of tailwind colors)
+   ───────────────────────────────────────────────────────────────── */
+.bg-canvas   { background: var(--bg-canvas); }
+.bg-surface  { background: var(--bg-surface); }
+.bg-raised   { background: var(--bg-raised); }
+.bg-card     { background: var(--card-bg); }
+.border-rule { border-color: var(--rule); }
+.border-rule-strong { border-color: var(--rule-strong); }
+.border-rule-faint  { border-color: var(--rule-faint); }
+.text-fg       { color: var(--fg); }
+.text-fg-quiet { color: var(--fg-quiet); }
+.text-fg-faint { color: var(--fg-faint); }
+.text-accent   { color: var(--accent); }
+.bg-accent     { background: var(--accent); }
+.border-accent { border-color: var(--accent); }
+.font-mono-num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }

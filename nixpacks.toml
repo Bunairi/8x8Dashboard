@@ -1,0 +1,22 @@
+[phases.setup]
+nixPkgs = [
+  "chromium",
+  "nss",
+  "nspr",
+  "atk",
+  "cups",
+  "libdrm",
+  "dbus",
+  "libxkbcommon",
+  "gtk3",
+  "pango",
+  "cairo",
+  "glib",
+  "alsa-lib",
+]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "node server/index.cjs"
