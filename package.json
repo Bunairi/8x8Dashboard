@@ -7,7 +7,7 @@
     "dev": "concurrently -k -p \"[{name}]\" -n \"SERVER,CLIENT\" -c \"yellow.bold,cyan.bold\" \"npm run server\" \"npm run client\"",
     "server": "node server/index.cjs",
     "client": "vite --port 5173",
-    "build": "vite build",
+    "build": "npm install --include=dev && vite build",
     "start": "NODE_ENV=production node server/index.cjs"
   },
   "dependencies": {
