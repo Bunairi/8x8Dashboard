@@ -142,13 +142,19 @@ app.get('/api/health', async (_req, res) => {
 });
 
 // Real-time queue metrics — polled every 5s by the frontend
+// NOTE: requires Contact Center API endpoint — update REALTIME_BASE_URL once known
+const REALTIME_BASE = process.env.EIGHT_BY_EIGHT_REALTIME_BASE || '';
+
 app.get('/api/realtime', async (req, res) => {
   if (!PBX_ID) return res.status(400).json({ error: 'EIGHT_BY_EIGHT_PBX_ID not set in .env' });
+  if (!REALTIME_BASE) {
+    return res.status(503).json({ code: 'REALTIME_UNAVAILABLE', error: 'Real-time API endpoint not yet configured' });
+  }
   const queueIds = req.query.queueIds || QUEUE_IDS || undefined;
   const params   = { metrics: ALL_METRICS };
   if (queueIds) params.queueIds = queueIds;
   try {
-    const data = await apiGet(`${BASE_URL}/v1/pbxes/${PBX_ID}/call-queue-metrics/summary`, params);
+    const data = await apiGet(`${REALTIME_BASE}/pbxes/${PBX_ID}/call-queue-metrics/summary`, params);
     res.json({ raw: data, queueIds, timestamp: new Date().toISOString() });
   } catch (err) { handleApiError(err, res); }
 });
