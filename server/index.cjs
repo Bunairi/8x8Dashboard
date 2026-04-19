@@ -46,14 +46,13 @@ async function getAccessToken() {
   }
 
   console.log('[Auth] Fetching new OAuth token…');
-  const params = new URLSearchParams({
-    grant_type:    'client_credentials',
-    client_id:     CLIENT_ID,
-    client_secret: CLIENT_SECRET,
-  });
+  const credentials = Buffer.from(`${CLIENT_ID}:${CLIENT_SECRET}`).toString('base64');
 
-  const response = await axios.post(TOKEN_URL, params.toString(), {
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+  const response = await axios.post(TOKEN_URL, 'grant_type=client_credentials', {
+    headers: {
+      'Content-Type':  'application/x-www-form-urlencoded',
+      'Authorization': `Basic ${credentials}`,
+    },
   });
 
   const { access_token, expires_in } = response.data;
