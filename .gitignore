@@ -2,3 +2,6 @@ node_modules/
 dist/
 .env
 *.local
+server/chrome-profile/
+server/.session.json
+debug/
